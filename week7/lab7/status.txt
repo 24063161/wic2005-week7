@@ -1,0 +1,76 @@
+# 404 Not Found
+$ curl -i http://api:8000/api/v1/vlans/77 -H "Authorization: Bearer $TOKEN"
+HTTP/1.1 404 Not Found
+Server: labapi/1.0 Python/3.12.16
+Date: Thu, 26 Nov 2026 02:53:24 GMT
+Content-Type: application/json
+Content-Length: 35
+
+{
+  "error": "VLAN 77 not found"
+}
+
+# 405 Method Not Allowed
+$ curl -i -X POST http://api:8000/api/v1/vlans/10 -H "Authorization: Bearer $TOKEN"
+HTTP/1.1 405 Method Not Allowed
+Server: labapi/1.0 Python/3.12.16
+Date: Thu, 26 Nov 2026 02:53:24 GMT
+Content-Type: application/json
+Content-Length: 54
+Allow: GET, PUT, PATCH, DELETE
+
+{
+  "error": "POST is not allowed on a single VLAN"
+}
+
+# 400 Bad Request
+$ curl -i -X POST http://api:8000/api/v1/vlans -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"id": 30, "name": guest}'
+HTTP/1.1 400 Bad Request
+Server: labapi/1.0 Python/3.12.16
+Date: Thu, 26 Nov 2026 02:53:24 GMT
+Content-Type: application/json
+Content-Length: 52
+
+{
+  "error": "the request body is not valid JSON"
+}
+
+# 422 Unprocessable Content
+$ curl -i -X PUT http://api:8000/api/v1/vlans/5000 -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"name": "too-big"}'
+HTTP/1.1 422 Unprocessable Entity
+Server: labapi/1.0 Python/3.12.16
+Date: Thu, 26 Nov 2026 02:53:24 GMT
+Content-Type: application/json
+Content-Length: 57
+
+{
+  "error": "id must be a VLAN number from 1 to 4094"
+}
+
+# 409 Conflict
+$ curl -i -X POST http://api:8000/api/v1/vlans -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"id": 10, "name": "users"}'
+HTTP/1.1 409 Conflict
+Server: labapi/1.0 Python/3.12.16
+Date: Thu, 26 Nov 2026 02:53:26 GMT
+Content-Type: application/json
+Content-Length: 63
+
+{
+  "error": "VLAN 10 already exists: use PUT to replace it"
+}
+
+# 403 Forbidden
+$ curl -i -X PUT http://api:8000/api/v1/vlans/30 -H "Authorization: Bearer $VIEWER_TOKEN" -H 'Content-Type: application/json' -d '{"name": "guests"}'
+HTTP/1.1 403 Forbidden
+Server: labapi/1.0 Python/3.12.16
+Date: Thu, 26 Nov 2026 02:53:26 GMT
+Content-Type: application/json
+Content-Length: 46
+
+{
+  "error": "viewer has a read-only token"
+}
+
+# 429 Too Many Requests (10 rapid GETs)
+$ for i in $(seq 10); do curl -s -o /dev/null -w "%{http_code} " http://api:8000/api/v1/vlans -H "Authorization: Bearer $TOKEN"; done
+200 200 200 200 200 429 429 429 429 429 
