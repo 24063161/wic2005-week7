@@ -1,0 +1,20 @@
+# intent.yaml: desired VLAN and ACL state for student ...3161 (10.61.0.0/16).
+# VLAN 1 belongs to the API and is left untouched by sync.py.
+
+student_id_last4: "3161"
+
+vlans:
+  - {id: 10, name: staff}
+  - {id: 20, name: servers}
+  - {id: 30, name: guests}
+  - {id: 40, name: mgmt}
+  - {id: 50, name: voice}
+  - {id: 60, name: iot}
+  - {id: 70, name: dmz}
+
+acl:
+  - {action: deny, src: 10.61.30.0/24, dst: 10.61.20.0/24, protocol: tcp, port: 22, description: guests-no-ssh}
+  - {action: deny, src: 10.61.60.0/24, dst: 10.61.40.0/24, protocol: any, description: iot-block-mgmt}
+  - {action: permit, src: 10.61.10.0/24, dst: 10.61.20.0/24, protocol: tcp, port: 443, description: staff-servers-https}
+  - {action: permit, src: 10.61.50.0/24, dst: 10.61.20.0/24, protocol: udp, port: 5060, description: voice-sip}
+  - {action: permit, src: 10.61.0.0/16, dst: 10.61.70.0/24, protocol: tcp, port: 80, description: internal-dmz-http}
