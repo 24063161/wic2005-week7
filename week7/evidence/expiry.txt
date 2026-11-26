@@ -1,0 +1,143 @@
+# API started with --token-ttl 3 --rate 2
+$ python3 sync.py intent.yaml
+[auth] logged in as netops
+Plan:
+  + VLAN 30 (guests) [PUT /api/v1/vlans/30]
+  + VLAN 40 (mgmt) [PUT /api/v1/vlans/40]
+  + VLAN 50 (voice) [PUT /api/v1/vlans/50]
+  + VLAN 60 (iot) [PUT /api/v1/vlans/60]
+  + VLAN 70 (dmz) [PUT /api/v1/vlans/70]
+  ~ VLAN 10: 'users' -> 'staff' [PUT /api/v1/vlans/10]
+  - VLAN 99 (old-guest) [DELETE /api/v1/vlans/99]
+  + ACL deny 10.61.30.0/24 -> 10.61.20.0/24 tcp/22 (guests-no-ssh) [POST /api/v1/acl/entries]
+  + ACL deny 10.61.60.0/24 -> 10.61.40.0/24 any (iot-block-mgmt) [POST /api/v1/acl/entries]
+  + ACL permit 10.61.10.0/24 -> 10.61.20.0/24 tcp/443 (staff-servers-https) [POST /api/v1/acl/entries]
+  + ACL permit 10.61.50.0/24 -> 10.61.20.0/24 udp/5060 (voice-sip) [POST /api/v1/acl/entries]
+  + ACL permit 10.61.0.0/16 -> 10.61.70.0/24 tcp/80 (internal-dmz-http) [POST /api/v1/acl/entries]
+[rate] 429 on PUT http://api:8000/api/v1/vlans/30 — sleeping 1.0s
+[apply] PUT /api/v1/vlans/30 -> 201
+[apply] PUT /api/v1/vlans/40 -> 201
+[rate] 429 on PUT http://api:8000/api/v1/vlans/50 — sleeping 1.0s
+[apply] PUT /api/v1/vlans/50 -> 201
+[apply] PUT /api/v1/vlans/60 -> 201
+[rate] 429 on PUT http://api:8000/api/v1/vlans/70 — sleeping 1.0s
+[auth] 401 on PUT http://api:8000/api/v1/vlans/70 — token expired, logging in again
+[auth] logged in as netops
+[apply] PUT /api/v1/vlans/70 -> 201
+[apply] PUT /api/v1/vlans/10 -> 200
+[rate] 429 on DELETE http://api:8000/api/v1/vlans/99 — sleeping 1.0s
+[apply] DELETE /api/v1/vlans/99 -> 204
+[apply] POST /api/v1/acl/entries -> 201 (id=1, replayed=false)
+[rate] 429 on POST http://api:8000/api/v1/acl/entries — sleeping 1.0s
+[apply] POST /api/v1/acl/entries -> 201 (id=2, replayed=false)
+[apply] POST /api/v1/acl/entries -> 201 (id=3, replayed=false)
+[rate] 429 on POST http://api:8000/api/v1/acl/entries — sleeping 1.0s
+[auth] 401 on POST http://api:8000/api/v1/acl/entries — token expired, logging in again
+[auth] logged in as netops
+[apply] POST /api/v1/acl/entries -> 201 (id=4, replayed=false)
+[apply] POST /api/v1/acl/entries -> 201 (id=5, replayed=false)
+[rate] 429 on GET http://api:8000/api/v1/vlans — sleeping 1.0s
+Converged: API state matches intent.yaml (7 managed VLANs, 5 ACL entries; 20 write attempts, 28 total requests).
+
+$ curl -s http://api:8000/api/v1/lab/audit
+{
+  "writes": 12,
+  "items": [
+    {
+      "seq": 1,
+      "time": "03:12:55",
+      "method": "PUT",
+      "path": "/api/v1/vlans/30",
+      "status": 201,
+      "change": "created VLAN 30 guests"
+    },
+    {
+      "seq": 2,
+      "time": "03:12:55",
+      "method": "PUT",
+      "path": "/api/v1/vlans/40",
+      "status": 201,
+      "change": "created VLAN 40 mgmt"
+    },
+    {
+      "seq": 3,
+      "time": "03:12:56",
+      "method": "PUT",
+      "path": "/api/v1/vlans/50",
+      "status": 201,
+      "change": "created VLAN 50 voice"
+    },
+    {
+      "seq": 4,
+      "time": "03:12:56",
+      "method": "PUT",
+      "path": "/api/v1/vlans/60",
+      "status": 201,
+      "change": "created VLAN 60 iot"
+    },
+    {
+      "seq": 5,
+      "time": "03:12:57",
+      "method": "PUT",
+      "path": "/api/v1/vlans/70",
+      "status": 201,
+      "change": "created VLAN 70 dmz"
+    },
+    {
+      "seq": 6,
+      "time": "03:12:57",
+      "method": "PUT",
+      "path": "/api/v1/vlans/10",
+      "status": 200,
+      "change": "set VLAN 10 staff"
+    },
+    {
+      "seq": 7,
+      "time": "03:12:58",
+      "method": "DELETE",
+      "path": "/api/v1/vlans/99",
+      "status": 204,
+      "change": "deleted VLAN 99"
+    },
+    {
+      "seq": 8,
+      "time": "03:12:58",
+      "method": "POST",
+      "path": "/api/v1/acl/entries",
+      "status": 201,
+      "change": "added ACL entry 1: deny 10.61.30.0/24 \u2192 10.61.20.0/24 tcp/22"
+    },
+    {
+      "seq": 9,
+      "time": "03:12:59",
+      "method": "POST",
+      "path": "/api/v1/acl/entries",
+      "status": 201,
+      "change": "added ACL entry 2: deny 10.61.60.0/24 \u2192 10.61.40.0/24 any"
+    },
+    {
+      "seq": 10,
+      "time": "03:12:59",
+      "method": "POST",
+      "path": "/api/v1/acl/entries",
+      "status": 201,
+      "change": "added ACL entry 3: permit 10.61.10.0/24 \u2192 10.61.20.0/24 tcp/443"
+    },
+    {
+      "seq": 11,
+      "time": "03:13:00",
+      "method": "POST",
+      "path": "/api/v1/acl/entries",
+      "status": 201,
+      "change": "added ACL entry 4: permit 10.61.50.0/24 \u2192 10.61.20.0/24 udp/5060"
+    },
+    {
+      "seq": 12,
+      "time": "03:13:00",
+      "method": "POST",
+      "path": "/api/v1/acl/entries",
+      "status": 201,
+      "change": "added ACL entry 5: permit 10.61.0.0/16 \u2192 10.61.70.0/24 tcp/80"
+    }
+  ]
+}

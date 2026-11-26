@@ -1,0 +1,22 @@
+$ python3 sync.py intent.yaml --dry-run
+[auth] logged in as netops
+Plan:
+  + VLAN 30 (guests) [PUT /api/v1/vlans/30]
+  + VLAN 40 (mgmt) [PUT /api/v1/vlans/40]
+  + VLAN 50 (voice) [PUT /api/v1/vlans/50]
+  + VLAN 60 (iot) [PUT /api/v1/vlans/60]
+  + VLAN 70 (dmz) [PUT /api/v1/vlans/70]
+  ~ VLAN 10: 'users' -> 'staff' [PUT /api/v1/vlans/10]
+  - VLAN 99 (old-guest) [DELETE /api/v1/vlans/99]
+  + ACL deny 10.61.30.0/24 -> 10.61.20.0/24 tcp/22 (guests-no-ssh) [POST /api/v1/acl/entries]
+  + ACL deny 10.61.60.0/24 -> 10.61.40.0/24 any (iot-block-mgmt) [POST /api/v1/acl/entries]
+  + ACL permit 10.61.10.0/24 -> 10.61.20.0/24 tcp/443 (staff-servers-https) [POST /api/v1/acl/entries]
+  + ACL permit 10.61.50.0/24 -> 10.61.20.0/24 udp/5060 (voice-sip) [POST /api/v1/acl/entries]
+  + ACL permit 10.61.0.0/16 -> 10.61.70.0/24 tcp/80 (internal-dmz-http) [POST /api/v1/acl/entries]
+Dry run complete: 0 writes sent (3 read/auth requests).
+
+$ curl -s http://api:8000/api/v1/lab/audit
+{
+  "writes": 0,
+  "items": []
+}
